@@ -1,0 +1,82 @@
+# Create monitoring-system namespace
+- name: Create Namespace - monitoring-system
+  k8s:
+    state: present
+    definition: "{{ lookup('template', '../global_templates/namespace-system.yml.j2') }}"
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+  vars:
+    namespace_name: monitoring-system
+    pss_policy_level: baseline
+
+
+# Configure the helm repository on the deployment host. This
+# adds the Jetstack helm repository and updates the list
+# of available helm charts.
+
+- name: Add prometheus stack chart repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: "{{ kube_prometheus_stack_repo }}"
+
+
+# Install the Kubernetes Stack to the monitoring-system namespace
+- name: Install/Upgrade Kubernetes Stack to "{{ kube_prometheus_stack_version }}"
+  block:
+    # Create a temporary file in deployment host
+    # filesystem for the Kubernetes Stack values file.
+    - name: Create Kubernetes Stack values file
+      tempfile:
+        state: file
+        suffix: kube-prometheus-stack-values
+      register: kube_prometheus_stack_values
+      changed_when: false
+
+    # Convert the values.kube_prometheus_stack.yml.j2 file located within
+    # the templates folder to a template file and associate it with the
+    # previously made temporary file.
+    - name: Template Kubernetes Stack values file
+      template:
+        src: values.kube_prometheus_stack.yml.j2
+        dest: "{{ kube_prometheus_stack_values.path }}"
+      diff: no
+      changed_when: false
+
+- name: Deploy prometheus stack with values loaded from template
+  kubernetes.core.helm:
+    name: prometheus-stack
+    chart_ref: prometheus-community/kube-prometheus-stack
+    chart_version: "{{ kube_prometheus_stack_version }}"
+    release_namespace: monitoring-system
+    context: "{{ kube_context }}"
+    values: "{{ lookup('template', '{{ kube_prometheus_stack_values.path }}') | from_yaml }}"
+    wait: true
+
+
+# Apply custom prometheus rules
+- name: Apply PrometheusRules
+  k8s:
+    state: present
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+    src: "{{ item }}"
+  with_fileglob:
+    - "files/kube-prometheus-stack/prometheusrules/*.yaml"
+  loop_control:
+    label: "{{ item | basename }}"
+
+
+# Add Grafana Datasources
+- name: Install/Update Grafana Datasources
+  k8s:
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+    state: present
+    src: "{{ item }}"
+    namespace: monitoring-system
+    validate:
+      fail_on_error: no
+  with_fileglob:
+    - "files/kube-prometheus-stack/grafana-datasources/*.yaml"
+  loop_control:
+    label: "{{ item | basename }}"

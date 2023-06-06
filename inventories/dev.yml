@@ -1,0 +1,9 @@
+all:
+  vars:
+    kube_context: minikube
+  hosts:
+    localhost
+  #children:
+   # tenant:
+    #  hosts:
+     #   minikube

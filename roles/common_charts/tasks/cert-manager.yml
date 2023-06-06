@@ -1,0 +1,68 @@
+---
+- name: Create Namespace - cert-manager-system
+  k8s:
+    state: present
+    definition: "{{ lookup('template', '../global_templates/namespace-system.yml.j2') }}"
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+  vars:
+    namespace_name: cert-manager-system
+    pss_policy_level: restricted
+
+
+# Configure the helm repository on the deployment host. This
+# adds the Jetstack helm repository and updates the list
+# of available helm charts.
+
+- name: Add cert-manager chart repo
+  kubernetes.core.helm_repository:
+    name: cert-manager
+    repo_url: "{{ cert_manager_helm_repository }}"
+
+# Install the cert-manager Stack to the cert-manager namespace
+- name: Install/Upgrade cert-manager
+  block:
+  # Create a temporary file in deployment host
+  # filesystem for the cert Stack values file.
+    - name: Create cert-manager Values File
+      tempfile:
+        state: file
+        suffix: cert_manager-values
+      register: cert_manager_values
+      changed_when: false
+
+# Convert the values.cert_manager.yml.j2 file located within the
+# templates folder to a template file and associate it with the
+# previously made temporary file.
+    - name: Template cert-manager Values File
+      template:
+        src: values.cert_manager.yml.j2
+        dest: "{{ cert_manager_values.path }}"
+      diff: no
+      changed_when: false
+
+- name: Deploy cert-manager with values loaded from template
+  kubernetes.core.helm:
+    name: cert-manager
+    chart_ref: cert-manager/cert-manager
+    chart_version: "{{ cert_manager_version }}"
+    release_namespace: cert-manager-system
+    update_repo_cache: True
+    context: "{{ kube_context }}"
+    values: "{{ lookup('template', '{{ cert_manager_values.path }}') | from_yaml }}"
+    wait: true
+
+# Cycle through the fles folder in the files folder and
+# apply or update any of the manifests located there.
+- name: Configure ClusterIssuers
+  k8s:
+    state: present
+    src: "{{ item }}"
+    validate:
+      fail_on_error: yes
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+  with_fileglob:
+    - "files/cert-manager/*.yaml"
+  loop_control:
+    label: "{{ item | basename }}"

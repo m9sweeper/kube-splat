@@ -1,0 +1,202 @@
+#jinja2:lstrip_blocks: True
+---
+
+# Sets if coreDNS be enabled
+coreDns:
+  enabled: true
+
+# Sets if kubeDNS should be enabled
+kubeDns:
+  enabled: false
+
+# Configure PrometheusOperator settings
+prometheusOperator:
+  enabled: true
+  priorityClassName: system-cluster-critical
+  # Sets if CustomResourceDefinitions should be created by the chart.
+  # This should be set to false if using helm 3+
+  createCustomResource: false
+  admissionWebhooks:
+    # Security context for create job container
+    createSecretJob:
+      securityContext:
+        runAsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+
+    # Security context for patch job container
+    patchWebhookJob:
+      securityContext:
+        runAsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+
+## Create default rules for monitoring the cluster
+
+defaultRules:
+  create: true
+  rules:
+    # Disable rules for the k8s control plane, the EKS managed control plane does not expose metrics
+    kubeScheduler: false
+    kubeControllerManager: false
+
+# Disable scraping for the k8s control plane, the EKS managed control plane does not expose metrics
+# Disabling scraping of Master Nodes Components
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+{# kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false #}
+
+
+# Configure AlertManager Settings
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    priorityClassName: system-cluster-critical
+    resources:
+      requests:
+        memory: 24Mi
+        cpu: 10m
+      limits:
+        memory: 256Mi
+        cpu: 100m
+  serviceMonitor:
+    ## Scrape interval. If not set, the Prometheus default scrape interval is used.
+    ##
+    interval: ""
+    selfMonitor: true
+
+kubeStateMetrics:
+  enabled: true
+kube-state-metrics:
+  priorityClassName: system-cluster-critical
+
+nodeExporter:
+  enabled: true
+prometheus-node-exporter:
+  priorityClassName: system-cluster-critical
+  # deploy to kube-system so we don't have to allow monitoring-system namespace to be privileged
+  namespaceOverride: "kube-system"
+
+
+## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+##
+grafana:
+  enabled: true
+  namespaceOverride: ""
+
+  ## Deploy default dashboards.
+  ##
+  defaultDashboardsEnabled: true
+
+  adminPassword: "{{ grafana_admin_password }}"
+
+  # Configure Core Grafana Settings
+  grafana.ini:
+    server:
+      root_url: "{{ grafana_host }}"
+
+  #Appy priorityclass
+  priorityClassName: system-cluster-critical
+  # Configure Grafana persisence storage settings
+  persistence:
+    # Sets if persistence storage should be enabled
+    enabled: false
+    # Set the type of persistence storage backend
+    type: pvc
+    # The name for the persistence volume claim
+    metadata:
+      name: grafana-data
+    # The name of the StorageClass to be used
+    storageClassName: default
+    # The access modes allowed on the PVC
+    accessModes:
+      - ReadWriteOnce
+    # The size of the persistence volume
+    size: 10Gi
+
+  # Configure Grafana Sidecar Setings
+  sidecar:
+    # Custom Dashboard settings
+    dashboards:
+      # Sets if custom dashboards should be enabled
+      enabled: true
+      # Sets if dashboards can be updated through the UI
+      provider:
+        allowUiUpdates: true
+      # The label set on custom dashboards to allow Grafana to find them
+      label: grafana_dashboard
+    # Custom Datasources settings
+    datasources:
+      # Sets if custom datasources should be enabled
+      enabled: true
+      # Sets if the default DataSource between prometheus and grafana should be enabled
+      defaultDatasourceEnabled: true
+
+  # Configure Grafana Ingress Settings
+  ingress:
+    # Sets if Grafana should configure an ingress
+    {% if grafana_ingress_enabled %}
+    enabled: true
+    {% else %}
+    enabled: false
+    {% endif %}
+    # The annotations applied to the Grafana Ingress
+    annotations:
+      kubernetes.io/ingress.class: nginx
+
+  # Configure Grafana Service Settings
+  service:
+    # The ClusterIP Port that Grafana should be available on
+    port: 3000
+    # The name of the Grafana ClusterIP port
+    portName: http-grafana
+
+##### Prometheus configuration ##########
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    priorityClassName: system-cluster-critical
+    # The length of time that data should be saved
+    retention: 30d
+    # Configure Prometheus Storage Backend Settings
+    storageSpec:
+    # Configure the PVC Template for Prometheus
+      volumeClaimTemplate:
+        # The name of the PVC
+        metadata:
+          name: prometheus-data
+        # Configure he setings of the PVC
+        spec:
+          # The name of the StorageClass to be used
+          storageClassName: default
+          # The access modes allowed on the PVC
+          accessModes:
+          - ReadWriteOnce
+          # The size of the volume
+          resources:
+            requests:
+              storage: 100Gi
+    # Select all servicemonitors in all namespaces
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    # Select all podmonitors in all namespaces
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
+    # Resource requests and limits for prometheus instances
+    resources:
+      requests:
+        memory: 500Mi
+        cpu: 300m
+      limits:
+        memory: 2Gi
+        cpu: 2
+
+    additionalScrapeConfigs: {}

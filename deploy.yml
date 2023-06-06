@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: False
+  vars:
+    os_environment:
+      - key: PYTHONPATH
+        value: /usr/local/bin/python3
+  tasks:
+    # Start the playbook on the local machine running the command
+    - name: Start
+      debug:
+        msg: Starting Main Play
+      run_once: true
+      delegate_to: localhost
+
+    - pip:
+        name:
+          - kubernetes
+          - kubernetes-validate
+          - PyYAML
+
+    - name: Common Addons
+      import_role:
+        name: common_charts
+      tags: [ always ]

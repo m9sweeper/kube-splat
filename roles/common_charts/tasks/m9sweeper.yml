@@ -1,0 +1,57 @@
+---
+- name: Create Namespace - m9sweeper-system
+  k8s:
+    state: present
+    definition: "{{ lookup('template', '../global_templates/namespace-system.yml.j2') }}"
+  #  kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+  vars:
+    namespace_name: m9sweeper-system
+    pss_policy_level: restricted
+
+
+# Configure the helm repository on the deployment host. This
+# adds the loki helm repository and updates the list
+# of available helm charts.
+
+- name: Add m9sweeper chart repo
+  kubernetes.core.helm_repository:
+    name: m9sweeper
+    repo_url: "{{ m9sweeper_helm_chart_repo }}"
+
+
+# Install the m9sweeper Stack to the m9sweeper-system namespace
+- name: Install/Upgrade m9sweeper
+  block:
+    # Create a temporary file in deployment host
+    # filesystem for the m9sweeper Stack values file.
+    - name: Create m9sweeper Values File
+      tempfile:
+        state: file
+        suffix: m9sweeper-values
+      register: m9sweeper_values
+      changed_when: false
+
+    # Convert the values.m9sweeper_stack.yml.j2 file located within the
+    # templates folder to a template file and associate it with the
+    # previously made temporary file.
+    - name: Template m9sweeperk Values File
+      template:
+        src: values.m9sweeper.yml.j2
+        dest: "{{ m9sweeper_values.path }}"
+      diff: no
+      changed_when: false
+
+
+    # Install m9sweeper  using the helm chart and apply the values template.
+    # If ansible is running in check mode, then this will run helm with the diff option.
+
+- name: Deploy m9sweeper with values loaded from template
+  kubernetes.core.helm:
+    name: m9sweeper
+    chart_ref: m9sweeper/m9sweeper
+    chart_version: "{{ m9sweeper_helm_chart_version }}"
+    release_namespace: m9sweeper-system
+    context: "{{ kube_context }}"
+    values: "{{ lookup('template', '{{ m9sweeper_values.path }}') | from_yaml }}"
+    wait: true

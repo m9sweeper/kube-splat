@@ -1,0 +1,59 @@
+---
+# Configure the ClusterRole for the Descheduler. This uses the
+# clusterrole.yaml file located within the files folder.
+- name: Configure Descheduler ClusterRole
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'files/descheduler/clusterrole.yaml') }}"
+    validate:
+      fail_on_error: yes
+    context: "{{ kube_context }}"
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+
+
+# Configure the ClusterRoleBinding for the Descheduler. This uses the
+# clusterrolebinding.yaml file located within the files folder.
+- name: Configure Descheduler ClusterRoleBinding
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'files/descheduler/clusterrolebinding.yaml') }}"
+    validate:
+      fail_on_error: yes
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+
+
+# Configure the ServiceAccount for the Descheduler. This uses the
+# serviceaccount.yaml file located within the files folder.
+- name: Configure Descheduler ServiceAccount
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'files/descheduler/serviceaccount.yaml') }}"
+    validate:
+      fail_on_error: yes
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+
+
+# Configure the DeschedulerPolicy for the Descheduler as a ConfigMap.
+# This uses the configmap.yaml file located within the files folder.
+- name: Configure Descheduler DeschedulerPolicy (ConfigMap)
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'files/descheduler/configmap.yaml') }}"
+    validate:
+      fail_on_error: yes
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+
+
+# Configure the CronJob for the Descheduler. This uses the
+# cronjob.yaml file located wtihin the files folder.
+- name: Configure Descheduler CronJob
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'files/descheduler/cronjob.yaml') }}"
+    validate:
+      fail_on_error: yes
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"

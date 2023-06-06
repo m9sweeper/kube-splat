@@ -1,0 +1,30 @@
+#jinja2:lstrip_blocks: True
+---
+# Configure the settings for NGINX.
+controller:
+  replicaCount: 1
+  service:
+    annotations:
+     ### You can annotations here as per cloud provider
+       ### Example for AWS
+      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
+      #service.beta.kubernetes.io/aws-load-balancer-attributes: load_balancing.cross_zone.enabled=true
+      #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
+      #service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+      #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    # Must use local for traffic policy in order for ELB health checks to pass
+    #externalTrafficPolicy: Local
+    # For GKE versions 1.17 and later
+      #networking.gke.io/load-balancer-type: "Internal"
+        # For earlier versions
+      #cloud.google.com/load-balancer-type: "Internal"
+    # For Azure
+      #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    # Create internal LB
+      #service.beta.kubernetes.io/oci-load-balancer-internal: "true"
+
+
+
+# Enable prometheus metrics endpoint for the NGINX controller
+prometheus:
+  create: {{ prometheus_stack_enabled }}

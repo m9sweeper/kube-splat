@@ -1,0 +1,57 @@
+---
+- name: Create Namespace - nginx-ingress-system
+  k8s:
+    state: present
+    definition: "{{ lookup('template', '../global_templates/namespace-system.yml.j2') }}"
+    #kubeconfig: "{{ kubeconfig_file_path }}"
+    context: "{{ kube_context }}"
+  vars:
+    namespace_name: nginx-ingress-system
+    pss_policy_level: baseline
+
+
+# Configure the helm repository on the deployment host. This
+# adds the NGINX helm repository and updates the list
+# of available helm charts.
+
+- name: Setup Helm Repository
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: "{{ nginx_helm_chart_repo }}"
+
+
+# Install the NGINX Ingress Controller
+- name: Install/Upgrade NGINX
+  block:
+    # Create a temporary file in deployment host
+    # filesystem for the NGINX values file.
+    - name: Create NGINX Values File
+      tempfile:
+        state: file
+        suffix: nginx-values
+      register: nginx_values
+      changed_when: false
+
+    # Convert the values.nginx.yml.j2 file located within the
+    # templates folder to a template file and associate it with the
+    # previously made temporary file.
+    - name: Template NGINX Values File
+      template:
+        src: values.nginx.yml.j2
+        dest: "{{ nginx_values.path }}"
+      diff: no
+      changed_when: false
+
+
+    # Install NGINX using the helm chart and apply the values template.
+    # If ansible is running in check mode, then this will run helm with the diff option.
+
+    - name: Deploy NGINX with values loaded from template
+      kubernetes.core.helm:
+        name: ingress-nginx
+        chart_ref: ingress-nginx/ingress-nginx
+        chart_version: "{{ nginx_helm_chart_version }}"
+        release_namespace: nginx-ingress-system
+        context: "{{ kube_context }}"
+        values: "{{ lookup('template', '{{ nginx_values.path }}') | from_yaml }}"
+        wait: true

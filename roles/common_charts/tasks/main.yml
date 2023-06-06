@@ -1,0 +1,15 @@
+---
+- include_tasks: k8s-resources.yml
+- include_tasks: descheduler.yml
+- include_tasks: kube-prometheus-stack.yml
+  when: prometheus_stack_enabled == true
+- include_tasks: m9sweeper.yml
+  when: m9sweeper_enabled == true
+- include_tasks: cert-manager.yml
+  when: cert_manager_enabled == true
+- include_tasks: loki-stack.yml
+  when: loki_stack_enabled == true
+- include_tasks: metrics-server.yml
+  when: metrics_server_enabled == true
+- include_tasks: nginx-ingress.yml
+  when: nginx_enabled == true

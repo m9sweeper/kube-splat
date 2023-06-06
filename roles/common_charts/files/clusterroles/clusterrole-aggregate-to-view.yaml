@@ -1,0 +1,26 @@
+# View role should be able to view some Istio and Cert Manager CR's that we use for now
+# Gateway
+# VirtualService
+# DestinationRule
+# Certificates
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aggregate-to-view
+  labels: 
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+rules:
+  - apiGroups: 
+      - networking.istio.io
+    resources: 
+      - gateways
+      - virtualservices
+      - destinationrules 
+      - sidecars
+    verbs: 
+      - get 
+      - list 
+      - watch

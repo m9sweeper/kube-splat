@@ -1,0 +1,75 @@
+---
+ - name: Configure StorageClasses
+   k8s:
+     state: present
+     src: "{{ item }}"
+     validate:
+       fail_on_error: yes
+     #kubeconfig: "{{ kubeconfig_file_path }}"
+     context: "{{ kube_context }}"
+   with_fileglob:
+     - "files/storageclasses/*.yaml"
+   loop_control:
+     label: "{{ item | basename }}"
+
+# Cycle through the clusterroles folder in the files folder
+# and apply or update any ClusterRole files located there.
+ - name: Configure Cluster Roles
+   k8s:
+     state: present
+     src: "{{ item }}"
+     validate:
+       fail_on_error: yes
+     #kubeconfig: "{{ kubeconfig_file_path }}"
+     context: "{{ kube_context }}"
+   with_fileglob:
+     - "files/clusterroles/*.yaml"
+   loop_control:
+     label: "{{ item | basename }}"
+
+
+# # Cycle through the clusterrolebindings folder in the files folder
+# # and apply or update any ClusterRoleBinding files located there.
+ - name: Configure Cluster Role Bindings
+   k8s:
+     state: present
+     src: "{{ item }}"
+     validate:
+       fail_on_error: yes
+     #kubeconfig: "{{ kubeconfig_file_path }}"
+     context: "{{ kube_context }}"
+   with_fileglob:
+     - "files/clusterrolebindings/*.yaml"
+   loop_control:
+     label: "{{ item | basename }}"
+
+
+# # Cycle through the rolebindings folder in the files folder
+# # and apply or update any RoleBinding files located there.
+ - name: Configure Role Bindings
+   k8s:
+     state: present
+     src: "{{ item }}"
+     validate:
+       fail_on_error: yes
+     #kubeconfig: "{{ kubeconfig_file_path }}"
+     context: "{{ kube_context }}"
+   with_fileglob:
+     - "files/rolebindings/*.yaml"
+   loop_control:
+     label: "{{ item | basename }}"
+
+# # Cycle through the roles folder in the files folder
+# # and apply or update any roles files located there.
+ - name: Configure Roles
+   k8s:
+     state: present
+     src: "{{ item }}"
+     validate:
+       fail_on_error: yes
+     #kubeconfig: "{{ kubeconfig_file_path }}"
+     context: "{{ kube_context }}"
+   with_fileglob:
+     - "files/roles/*.yaml"
+   loop_control:
+     label: "{{ item | basename }}"

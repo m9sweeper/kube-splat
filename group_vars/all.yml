@@ -1,0 +1,53 @@
+---
+# Run this playbook on the deployment host
+ansible_connection: local
+
+# ## Cert Manager Helm Configuration
+cert_manager_enabled: true
+cert_manager_helm_repository: "https://charts.jetstack.io"
+cert_manager_version: "1.10.1"
+
+
+## Loki Stack Helm Configuration
+loki_stack_enabled: true
+loki.enabled: true
+promtail.enabled: true
+grafana_helm_chart_repo: "https://grafana.github.io/helm-charts"
+loki_stack_helm_chart_version: "2.8.9"
+
+
+## Prometheus Stack Helm Configuration
+prometheus_stack_enabled: true
+
+## You can enabke or disable particular service or chart for prometheus stack
+grafana.enabled: true
+alertmanager.enabled: true
+prometheus.enabled: true
+nodeExporter.enabled: true
+prometheusOperator.enabled: true
+kubeStateMetrics.enabled: true
+
+kube_prometheus_stack_repo: "https://prometheus-community.github.io/helm-charts"
+kube_prometheus_stack_version: "44.4.1"
+grafana_admin_password: "admin"
+grafana_host: "http://localhost:3000/"
+grafana_ingress_enabled: false
+
+
+## Metrics Server Helm Configuration
+metrics_server_enabled: true
+metrics_server_helm_chart_repo: "https://kubernetes-sigs.github.io/metrics-server/"
+metrics_server_chart_version: "3.8.3"
+
+## M9sweeper Helm Configuration
+m9sweeper_enabled: true
+m9sweeper_helm_chart_repo: "https://helm.m9sweeper.io/chartrepo/m9sweeper"
+m9sweeper_helm_chart_version: "1.3.0"
+global.jwtSecret: "changeme"
+global.apiKey: "YOUR-API-KEY"
+
+## Nginx Helm Configuration
+nginx_enabled: true
+nginx_helm_chart_repo: "https://kubernetes.github.io/ingress-nginx"
+nginx_helm_chart_version: "4.5.2"
+nginx.prometheus_enabled: true

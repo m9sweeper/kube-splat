@@ -1,0 +1,32 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  annotations:
+    meta.helm.sh/release-name: prometheus-stack
+    meta.helm.sh/release-namespace: monitoring-system
+    prometheus-operator-validated: "true"
+  labels:
+    app: kube-prometheus-stack
+    app.kubernetes.io/managed-by: Helm
+    chart: kube-prometheus-stack-12.8.1
+    heritage: Helm
+    release: prometheus-stack
+  name: prometheus-stack-kube-prom-cert.rules
+  namespace: monitoring-system
+spec:
+  groups:
+  - name: cert.rules
+    rules:
+    - alert: TLS certificate expiring
+      expr: (certmanager_certificate_expiration_timestamp_seconds - time())/86400 < 30
+      labels:
+        severity: warning
+      annotations:
+        description: Certificate will expire  {{$labels.namespace}}/{{$labels.name}}
+    - alert: TLS certificate expiring
+      expr: (certmanager_certificate_expiration_timestamp_seconds - time())/86400 < 15
+      labels:
+        severity: critical
+      annotations:
+        description: Certificate will expire {{$labels.namespace}}/{{$labels.name}}
