@@ -1,4 +1,6 @@
 ---
+- include_tasks: oci-resources.yml
+  when: kubernetes_platform == "OKE"
 - include_tasks: k8s-resources.yml
 - include_tasks: descheduler.yml
 - include_tasks: kube-prometheus-stack.yml

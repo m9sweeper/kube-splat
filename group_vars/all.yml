@@ -2,6 +2,10 @@
 # Run this playbook on the deployment host
 ansible_connection: local
 
+# Cloud provider the cluster is running on. Current supported values are: "OKE"
+## Can be left blank to not run cloud provider setup tasks
+kubernetes_platform: "OKE"
+
 # ## Cert Manager Helm Configuration
 cert_manager_enabled: true
 cert_manager_helm_repository: "https://charts.jetstack.io"

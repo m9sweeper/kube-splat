@@ -1,0 +1,21 @@
+---
+- name: Get list of nodes
+  k8s_info:
+    kind: Node
+    context: "{{ kube_context }}"
+  register: cluster_worker_nodes
+
+- name: Get list of node names
+  set_fact:
+    cluster_node_names: "{{ cluster_worker_nodes.resources | map(attribute='metadata.name') }}"
+
+- name: Remove inbuilt taints from OKE nodes
+  kubernetes.core.k8s_taint:
+    state: absent
+    name: "{{ item }}"
+    context: "{{ kube_context }}"
+    taints:
+      - effect: NoSchedule
+        key: "node.cloudprovider.kubernetes.io/uninitialized"
+        value: "true"
+  with_items: "{{ cluster_node_names }}"
