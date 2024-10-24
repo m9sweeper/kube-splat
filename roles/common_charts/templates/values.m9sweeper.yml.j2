@@ -39,15 +39,15 @@ global:
 # Dash Config #
 ###############
 dash:
-  image:
-    registry: m9sweeper
-    repository: dash
-    tag: latest
+### Image and registry configurations from the helm chart can be overridden if needed by uncommenting the following lines
+### This shouldn't be necessary for most use cases, but is an option if issues arise from the helm chart defaults
+#  image:
+#    registry: ghcr.io
+#    repository: m9sweeper/dash
 
-  kubesec:
-    registry: m9sweeper
-    repository: kubesec
-    tag: latest
+#  kubesec:
+#    registry: ghcr.io
+#    repository: m9sweeper/kubesec
 
   # values that will be used to initialize the Dash database during installation
   init:
@@ -117,9 +117,8 @@ dash:
 ##################
 trawler:
   image:
-    registry: m9sweeper
-    repository: trawler
-    tag: latest
+#    registry: ghcr.io
+#    repository: m9sweeper/trawler
   enableDebugLogs: false
 
   resources:

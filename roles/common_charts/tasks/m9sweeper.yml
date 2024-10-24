@@ -7,7 +7,7 @@
     context: "{{ kube_context }}"
   vars:
     namespace_name: m9sweeper-system
-    pss_policy_level: restricted
+    pss_policy_level: baseline
 
 
 # Configure the helm repository on the deployment host. This
