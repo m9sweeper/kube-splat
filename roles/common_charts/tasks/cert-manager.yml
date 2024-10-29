@@ -57,6 +57,6 @@
 - name: Template and configure cluster issuers
   include_tasks: cert-manager-cluster-issuers.yml
   with_fileglob:
-    - "files/cert-manager/*.j2"
+    - "templates/cert-manager/*.j2"
   loop_control:
     label: "{{ item | basename }}"
