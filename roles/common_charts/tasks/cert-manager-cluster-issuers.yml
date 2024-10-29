@@ -1,0 +1,24 @@
+- name: Create cluster issuer temp file
+  tempfile:
+    state: file
+    suffix: cluster_issuer
+  register: cluster_issuer_tempfile
+  changed_when: false
+
+- name: Template cluster issuer file
+  template:
+    src: "{{ item }}"
+    dest: "{{ cluster_issuer_tempfile.path }}"
+  diff: no
+  changed_when: false
+
+- name: Debug file
+  shell: cat {{ cluster_issuer_tempfile.path }}
+
+- name: Deploy cluster issuer
+  k8s:
+    state: present
+    src: "{{ cluster_issuer_tempfile.path }}"
+    validate:
+      fail_on_error: yes
+    context: "{{ kube_context }}"
