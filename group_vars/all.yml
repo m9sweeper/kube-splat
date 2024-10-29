@@ -59,4 +59,4 @@ nginx_enabled: true
 nginx_helm_chart_repo: "https://kubernetes.github.io/ingress-nginx"
 nginx_helm_chart_version: "4.5.2"
 nginx.prometheus_enabled: true
-nginx_oci_subnet_id: ""
+nginx_oci_subnet_id: "" # Only required in Oracle OKE clusters. Specifies a subnet to attach the load balancer to, which must be public

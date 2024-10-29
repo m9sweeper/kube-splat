@@ -12,9 +12,6 @@
   diff: no
   changed_when: false
 
-- name: Debug file
-  shell: cat {{ cluster_issuer_tempfile.path }}
-
 - name: Deploy cluster issuer
   k8s:
     state: present
