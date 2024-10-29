@@ -59,3 +59,4 @@ nginx_enabled: true
 nginx_helm_chart_repo: "https://kubernetes.github.io/ingress-nginx"
 nginx_helm_chart_version: "4.5.2"
 nginx.prometheus_enabled: true
+nginx_oci_subnet_id: "ocid1.subnet.oc1.iad.aaaaaaaajzq2kopk357gwbldvdghaa5f3obpn4yzjqktyk3evwwflybx2d2a"
