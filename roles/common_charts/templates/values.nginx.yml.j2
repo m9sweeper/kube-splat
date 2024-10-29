@@ -20,6 +20,14 @@ controller:
       #cloud.google.com/load-balancer-type: "Internal"
     # For Azure
       #service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    # For Oracle OKE
+    {% if kubernetes_platform == "OKE" %}
+      oci.oraclecloud.com/load-balancer-type: "lb"
+      oci.oraclecloud.com/security-rule-management-mode: "SL-ALL"
+      service.beta.kubernetes.io/oci-load-balancer-security-list-management-mode: "All"
+      oci-network-load-balancer.oraclecloud.com/security-list-management-mode: "All"
+      service.beta.kubernetes.io/oci-load-balancer-subnet1: "{{ nginx_oci_subnet_id }}"
+    {% endif %}
     # Create internal LB
       #service.beta.kubernetes.io/oci-load-balancer-internal: "true"
 
