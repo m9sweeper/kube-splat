@@ -112,7 +112,7 @@ grafana:
     metadata:
       name: grafana-data
     # The name of the StorageClass to be used
-    storageClassName: default
+    storageClassName: "{{ prometheus_storage_class_name }}"
     # The access modes allowed on the PVC
     accessModes:
       - ReadWriteOnce
@@ -174,7 +174,7 @@ prometheus:
         # Configure he setings of the PVC
         spec:
           # The name of the StorageClass to be used
-          storageClassName: default
+          storageClassName: "{{ prometheus_storage_class_name }}"
           # The access modes allowed on the PVC
           accessModes:
           - ReadWriteOnce

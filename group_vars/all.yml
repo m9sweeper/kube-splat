@@ -10,6 +10,7 @@ kubernetes_platform: "OKE"
 cert_manager_enabled: true
 cert_manager_helm_repository: "https://charts.jetstack.io"
 cert_manager_version: "1.10.1"
+letsencrypt_acme_email: "notify@intelletive.com"
 
 
 ## Loki Stack Helm Configuration
@@ -22,6 +23,7 @@ loki_stack_helm_chart_version: "2.8.9"
 
 ## Prometheus Stack Helm Configuration
 prometheus_stack_enabled: true
+prometheus_storage_class_name: "default"
 
 ## You can enabke or disable particular service or chart for prometheus stack
 grafana.enabled: true
